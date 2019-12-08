@@ -14,7 +14,9 @@ public interface ICD11Repository extends
         MongoRepository<ICD11, String>,
         QuerydslPredicateExecutor<ICD11>  {
 
-    List<ICD11> findAllByTitle(String title, Pageable pageable);
+    List<ICD11> findAllByTitle(String title);
 
-    List<ICD11> findAllByType(String type, Pageable pageable);
+    List<ICD11> findAllByType(String type);
+
+    List<ICD11> findAllByParent(String parent);
 }

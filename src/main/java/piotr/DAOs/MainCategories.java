@@ -7,12 +7,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document
+@Document("main_categories")
 @Data
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode
-public class mainCategories
+public class MainCategories
 {
     private String _id;
     private String title;

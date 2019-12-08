@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import piotr.DTOs.ICD11FullResponse;
+import piotr.DTOs.ICD11TreeView;
 import piotr.api.Service.ICD11Service;
 
 import java.util.List;
@@ -29,14 +30,13 @@ public class ICD11Controller {
     }
 
     @GetMapping(value = "")
-    public ResponseEntity<List<ICD11FullResponse>> getAllICDByNameOrId(
+    public ResponseEntity<ICD11TreeView> getAllICDByNameOrId(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String ICD,
-            @PageableDefault(page = 0, size = 100) Pageable pageable
+            @RequestParam(required = false) String ICD
             ) {
 
         return new ResponseEntity<>(
-                service.getAllByNameOrICD11(name, ICD, pageable),
+                service.getAllByNameOrICD11(name, ICD),
                 new HttpHeaders(),
                 HttpStatus.OK
         );

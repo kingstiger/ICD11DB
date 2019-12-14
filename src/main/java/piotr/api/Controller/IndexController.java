@@ -2,10 +2,12 @@ package piotr.api.Controller;
 
 
 import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@CrossOrigin
 public class IndexController implements ErrorController {
 
     private static final String PATH = "/error";

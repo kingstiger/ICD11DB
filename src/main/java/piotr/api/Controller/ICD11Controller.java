@@ -39,11 +39,11 @@ public class ICD11Controller {
     @GetMapping(value = "")
     public ResponseEntity<ICD11TreeView> getAllICDByNameOrId(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String ICD
-            ) {
+            @RequestParam(required = false) String ICD11
+            ) throws Exception {
 
         return new ResponseEntity<>(
-                service.getAllByNameOrICD11(name, ICD),
+                service.getAllByNameOrICD11(name, ICD11),
                 new HttpHeaders(),
                 HttpStatus.OK
         );

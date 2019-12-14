@@ -23,11 +23,12 @@ public class ICD11Service {
     @Autowired
     private MainCategoriesRepository mainCategoriesRepository;
 
-    public ICD11TreeView getAllByNameOrICD11(String name, String ICD) {
-        return getIcd11TreeView(reformatDiseaseName(name), ICD);
+    public ICD11TreeView getAllByNameOrICD11(String name, String ICD) throws Exception {
+        return getIcd11TreeView(
+                (name != null) ? reformatDiseaseName(name) : null, ICD);
     }
     public ICD11TreeView getAllByNameFuzzy(String name, String ICD) {
-        return getIcd11TreeViewFuzzy(reformatDiseaseName(name), ICD);
+        return getIcd11TreeViewFuzzy((name != null) ? reformatDiseaseName(name) : null, ICD);
     }
 
     private String reformatDiseaseName(String name) {
@@ -44,7 +45,7 @@ public class ICD11Service {
         return finalString.toString();
     }
 
-    private ICD11TreeView getIcd11TreeView(String name, String ICD) {
+    private ICD11TreeView getIcd11TreeView(String name, String ICD) throws Exception {
         if(((name != null) && name.equals("ICD-11")) || ((ICD != null) && ICD.equals("ICD-11"))) {
             ICD11TreeView god_himself = ICD11TreeView.builder()
                     .name("Literally, the whole database")
@@ -55,19 +56,31 @@ public class ICD11Service {
             god_himself.setChildren(getMainCategories());
             return god_himself;
         }
-        if(name != null) {
-            ICD11 byTitle = repository.findAllByTitle(name).get(0);
-            ICD11TreeView tree = getTree(byTitle);
-            return tree;
-        }
         if(ICD != null) {
-            ICD11 byId = repository.findById(ICD).get();
-            ICD11TreeView tree = getTree(byId);
-            return tree;
+            try {
+
+                ICD11 byId = repository.findById(ICD).get();
+                ICD11TreeView tree = getTree(byId);
+                return tree;
+            }
+            catch (NullPointerException ignored){};
         }
-        MainCategories firstMainCategory = mainCategoriesRepository.findAll().get(0);
-        ICD11 byId = repository.findById(firstMainCategory.get_id()).get();
-        ICD11TreeView tree = getTree(byId);
+        if(name != null) {
+            try {
+                ICD11 byTitle = (repository.findAllByTitle(name) != null) ? repository.findAllByTitle(name).get(0) : repository.findAllByTitleLike(name).get(0);
+                ICD11TreeView tree = getTree(byTitle);
+                return tree;
+            }
+            catch (NullPointerException ignored){};
+        }
+        ICD11TreeView tree;
+        try {
+            MainCategories firstMainCategory = mainCategoriesRepository.findAll().get(0);
+            ICD11 byId = repository.findById(firstMainCategory.get_id()).get();
+            tree = getTree(byId);
+        } catch (Exception ex) {
+            throw new Exception("SMTH WRONG");
+        }
         return tree;
     }
 

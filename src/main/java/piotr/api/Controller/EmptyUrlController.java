@@ -20,7 +20,9 @@ public class EmptyUrlController {
             "[base address]/api/ICD/test\n" +
             "   returns true, if api is working/available\n" +
             "[base address]/api/ICD/wholeDb\n" +
-            "   returns all data from database in JSON format";
+            "   returns all data from database in JSON format\n" +
+            "[base address]/api/ICD/fuzzy?name={name}\n" +
+            "   returns JSON-formatted data about disease with given name after fuzzy search in DB";
 
     @GetMapping(value = "")
     public ResponseEntity<String> emptyURL() {

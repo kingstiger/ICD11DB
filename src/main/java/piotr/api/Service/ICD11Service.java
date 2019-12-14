@@ -49,6 +49,19 @@ public class ICD11Service {
         return tree;
     }
 
+    public List<ICD11FullResponse> getAll() {
+        List<ICD11> all = repository.findAll();
+        return all
+                .stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+
+
+
+
+
     private ICD11TreeView mapMainCategoryToTree(MainCategories mainCategories) {
         return ICD11TreeView.builder()
                 .code(mainCategories.get_id())

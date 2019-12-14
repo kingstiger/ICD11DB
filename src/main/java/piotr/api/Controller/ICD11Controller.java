@@ -1,12 +1,13 @@
 package piotr.api.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import piotr.DTOs.ICD11FullResponse;
 import piotr.DTOs.ICD11TreeView;
 import piotr.api.Service.ICD11Service;
@@ -29,6 +30,14 @@ public class ICD11Controller {
         );
     }
 
+    @GetMapping(value = "/wholeDb")
+    public ResponseEntity<List<ICD11FullResponse>> wholeDb() {
+        return new ResponseEntity<>(
+                service.getAll(),
+                new HttpHeaders(),
+                HttpStatus.OK
+        );
+    }
     @GetMapping(value = "")
     public ResponseEntity<ICD11TreeView> getAllICDByNameOrId(
             @RequestParam(required = false) String name,

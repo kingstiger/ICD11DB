@@ -9,6 +9,7 @@ import piotr.DTOs.ICD11TreeView;
 import piotr.api.Repository.ICD11Repository;
 import piotr.api.Repository.MainCategoriesRepository;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +24,27 @@ public class ICD11Service {
     private MainCategoriesRepository mainCategoriesRepository;
 
     public ICD11TreeView getAllByNameOrICD11(String name, String ICD) {
+        return getIcd11TreeView(reformatDiseaseName(name), ICD);
+    }
+    public ICD11TreeView getAllByNameFuzzy(String name, String ICD) {
+        return getIcd11TreeViewFuzzy(reformatDiseaseName(name), ICD);
+    }
+
+    private String reformatDiseaseName(String name) {
+        String[] strings = name.split(" ");
+        String s = strings[0];
+        strings[0] = s.replace(s.charAt(0), String.valueOf(s.charAt(0)).toUpperCase().charAt(0));
+        StringBuilder finalString = new StringBuilder(strings[0]);
+        for (int i = 1; i < strings.length; i++) {
+            String string = strings[i];
+            finalString
+                    .append(" ")
+                    .append(string);
+        }
+        return finalString.toString();
+    }
+
+    private ICD11TreeView getIcd11TreeView(String name, String ICD) {
         if(((name != null) && name.equals("ICD-11")) || ((ICD != null) && ICD.equals("ICD-11"))) {
             ICD11TreeView god_himself = ICD11TreeView.builder()
                     .name("Literally, the whole database")
@@ -43,6 +65,29 @@ public class ICD11Service {
             ICD11TreeView tree = getTree(byId);
             return tree;
         }
+        MainCategories firstMainCategory = mainCategoriesRepository.findAll().get(0);
+        ICD11 byId = repository.findById(firstMainCategory.get_id()).get();
+        ICD11TreeView tree = getTree(byId);
+        return tree;
+    }
+
+    private ICD11TreeView getIcd11TreeViewFuzzy(String name, String ICD) {
+        if(((name != null) && name.equals("ICD-11")) || ((ICD != null) && ICD.equals("ICD-11"))) {
+            ICD11TreeView god_himself = ICD11TreeView.builder()
+                    .name("Literally, the whole database")
+                    .code("ICD-11")
+                    .parent("God himself")
+                    .link("https://en.wikipedia.org/wiki/International_Statistical_Classification_of_Diseases_and_Related_Health_Problems")
+                    .build();
+            god_himself.setChildren(getMainCategories());
+            return god_himself;
+        }
+        if(name != null) {
+            ICD11 byTitle = repository.findAllByTitleLike(name).get(0);
+            ICD11TreeView tree = getTree(byTitle);
+            return tree;
+        }
+
         MainCategories firstMainCategory = mainCategoriesRepository.findAll().get(0);
         ICD11 byId = repository.findById(firstMainCategory.get_id()).get();
         ICD11TreeView tree = getTree(byId);

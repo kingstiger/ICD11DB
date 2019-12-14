@@ -50,4 +50,16 @@ public class ICD11Controller {
                 HttpStatus.OK
         );
     }
+
+    @GetMapping(value = "/fuzzy")
+    public ResponseEntity<ICD11TreeView> getAllICDByNameFuzzy(
+            @RequestParam(required = false) String name
+    ) {
+
+        return new ResponseEntity<>(
+                service.getAllByNameFuzzy(name, null),
+                new HttpHeaders(),
+                HttpStatus.OK
+        );
+    }
 }

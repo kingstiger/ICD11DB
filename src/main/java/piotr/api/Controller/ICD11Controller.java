@@ -1,5 +1,7 @@
 package piotr.api.Controller;
 
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -9,6 +11,7 @@ import piotr.DTOs.ICD11FullResponse;
 import piotr.DTOs.ICD11TreeView;
 import piotr.api.Service.ICD11Service;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -36,6 +39,17 @@ public class ICD11Controller {
                 HttpStatus.OK
         );
     }
+
+    @GetMapping(value = "/wholeDbOWL")
+    public ResponseEntity<String> wholeDbOWL() throws Exception {
+        return new ResponseEntity<>(
+                service.getAllOWL(),
+                new HttpHeaders(),
+                HttpStatus.OK
+        );
+    }
+
+
     @GetMapping(value = "")
     public ResponseEntity<ICD11TreeView> getAllICDByNameOrId(
             @RequestParam(required = false) String name,

@@ -1,5 +1,8 @@
 package piotr.api.Service;
 
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
+import org.semanticweb.owlapi.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import piotr.DAOs.ICD11;
@@ -9,6 +12,11 @@ import piotr.DTOs.ICD11TreeView;
 import piotr.api.Repository.ICD11Repository;
 import piotr.api.Repository.MainCategoriesRepository;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -113,6 +121,78 @@ public class ICD11Service {
                 .stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    public String getAllOWL() throws Exception {
+        List<ICD11FullResponse> all = getAll();
+
+        IRI IOR = IRI.create("http://owl.api.icd11");
+
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        OWLOntology ontology = manager.createOntology(IOR);
+        OWLDataFactory df = ontology.getOWLOntologyManager().getOWLDataFactory();
+
+        OWLClass root = df.getOWLClass(IRI.create(IOR + "#" + "ICD-11"));
+        OWLDeclarationAxiom ra = df.getOWLDeclarationAxiom(root);
+        ontology.add(ra);
+
+        for (ICD11FullResponse icd : all) {
+            OWLClass data = df.getOWLClass(IRI.create(IOR + "#" + icd.get_id()));
+
+            OWLAnnotation title = df.getOWLAnnotation(df.getRDFSLabel(), df.
+                    getOWLLiteral("[" + icd.get_id() + "] " + icd.getTitle()));
+            OWLAxiom ax1 = df.getOWLAnnotationAssertionAxiom(data.getIRI(), title);
+            manager.applyChange(new AddAxiom(ontology, ax1));
+
+            if (!icd.getDefinition().isEmpty()) {
+                OWLAnnotation definition = df.getOWLAnnotation(df.getRDFSComment(), df.
+                        getOWLLiteral("Definition:\n" + icd.getDefinition()));
+                OWLAxiom ax2 = df.getOWLAnnotationAssertionAxiom(data.getIRI(), definition);
+                manager.applyChange(new AddAxiom(ontology, ax2));
+            }
+
+            OWLAnnotation type = df.getOWLAnnotation(df.getRDFSComment(), df.
+                    getOWLLiteral("Type: " + icd.getType()));
+            OWLAxiom ax3 = df.getOWLAnnotationAssertionAxiom(data.getIRI(), type);
+            manager.applyChange(new AddAxiom(ontology, ax3));
+
+            if (!icd.getSynonyms().isEmpty()) {
+                List<String> tmp = icd.getSynonyms();
+                StringBuilder synonyms = new StringBuilder("Synonyms:\n");
+                for (String synonym : tmp) {
+                    synonyms.append(synonym + "\n");
+                }
+                OWLAnnotation syn = df.getOWLAnnotation(df.getRDFSComment(), df.
+                        getOWLLiteral(synonyms.toString()));
+                OWLAxiom ax4 = df.getOWLAnnotationAssertionAxiom(data.getIRI(), syn);
+                manager.applyChange(new AddAxiom(ontology, ax4));
+            }
+
+            if (!icd.getWiki_link().isEmpty()) {
+                OWLAnnotation wiki_link = df.getOWLAnnotation(df.getRDFSSeeAlso(), df.
+                        getOWLLiteral("Wikipedia: " + icd.getWiki_link()));
+                OWLAxiom ax5 = df.getOWLAnnotationAssertionAxiom(data.getIRI(), wiki_link);
+                manager.applyChange(new AddAxiom(ontology, ax5));
+            }
+
+            OWLClass parent = df.getOWLClass(IOR + "#" + icd.getParent());
+            OWLSubClassOfAxiom ax6 = df.getOWLSubClassOfAxiom(data, parent);
+            ontology.add(ax6);
+        }
+
+        OWLDocumentFormat format = manager.getOntologyFormat(ontology);
+        OWLXMLDocumentFormat owlxmlFormat = new OWLXMLDocumentFormat();
+        if (format.isPrefixOWLDocumentFormat()) {
+            owlxmlFormat.copyPrefixesFrom(format.asPrefixOWLDocumentFormat());
+        }
+        manager.saveOntology(ontology, owlxmlFormat, IRI.create(new File("ICD11.owl").toURI()));
+
+        List<String> lines = Files.readAllLines(Paths.get("ICD11.owl"), StandardCharsets.UTF_8);
+        for (String str : lines) {
+            str = str + "\n";
+        }
+        String text = lines.stream().map(Object::toString).collect(Collectors.joining());
+        return text;
     }
 
 

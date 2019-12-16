@@ -230,34 +230,14 @@ public class ICD11Service {
 
     private ICD11TreeView getTree(ICD11 icd11) {
         ICD11TreeView build = getTreeNode(icd11);
-        ICD11TreeView root;
-        if(!icd11.getParent().equals("ICD-11")) {
-            ICD11 byId = repository.findById(icd11.getParent()).get();
-            root = getTreeNode(byId);
-            LinkedList<ICD11TreeView> rootChildren = root.getChildren();
-            List<ICD11TreeView> brothers = repository.findAllByParent(icd11.getParent()).stream()
+            build.setChildren(
+                    new LinkedList<>(repository.findAllByParent(icd11.get_id())
+                    .stream()
                     .map(this::getTreeNode)
-                    .collect(Collectors.toList());
-            List<ICD11TreeView> children = repository.findAllByParent(icd11.get_id()).stream()
-                    .map(this::getTreeNode)
-                    .filter(icd11TreeView -> !icd11TreeView.getName().equals(build.getName()))
-                    .collect(Collectors.toList());
-            ICD11TreeView base = brothers.get(0);
-            base.setChildren(new LinkedList<>(children));
-            brothers.set(0, base);
-            rootChildren.addAll(brothers);
-            root.setChildren(rootChildren);
-            return root;
-        } else {
-            root = build;
-            LinkedList<ICD11TreeView> rootChildren = root.getChildren();
-            List<ICD11TreeView> brothers = repository.findAllByParent(icd11.getParent()).stream()
-                    .map(this::getTreeNode)
-                    .collect(Collectors.toList());
-            rootChildren.addAll(brothers);
-            root.setChildren(rootChildren);
-        }
-        return root;
+                    .collect(Collectors.toList())
+                    )
+            );
+        return build;
 
     }
 

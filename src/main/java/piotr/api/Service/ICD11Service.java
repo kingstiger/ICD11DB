@@ -1,6 +1,5 @@
 package piotr.api.Service;
 
-import org.apache.commons.io.FileUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.model.*;
@@ -13,12 +12,7 @@ import piotr.DTOs.ICD11TreeView;
 import piotr.api.Repository.ICD11Repository;
 import piotr.api.Repository.MainCategoriesRepository;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -124,7 +118,7 @@ public class ICD11Service {
                 .collect(Collectors.toList());
     }
 
-    public String getAllOWL() throws Exception {
+    public ByteArrayOutputStream getAllOWL() throws Exception {
         List<ICD11FullResponse> all = getAll();
 
         IRI IOR = IRI.create("http://owl.api.icd11");
@@ -186,15 +180,17 @@ public class ICD11Service {
         if (format.isPrefixOWLDocumentFormat()) {
             owlxmlFormat.copyPrefixesFrom(format.asPrefixOWLDocumentFormat());
         }
-        manager.saveOntology(ontology, owlxmlFormat, IRI.create(new File("tmp/ICD11.owl").toURI()));
-
-        File file = new File("tmp/ICD11.owl");
-        List<String> lines = FileUtils.readLines(file, StandardCharsets.UTF_8);
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String line : lines) {
-            stringBuilder.append(line + "\n");
-        }
-        return stringBuilder.toString();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ontology.saveOntology(owlxmlFormat, byteArrayOutputStream);
+        return byteArrayOutputStream;
+//        manager.saveOntology(ontology, owlxmlFormat, IRI.create(new File("tmp/ICD11.owl").toURI()));
+//        File file = new File("tmp/ICD11.owl");
+//        List<String> lines = FileUtils.readLines(file, StandardCharsets.UTF_8);
+//        StringBuilder stringBuilder = new StringBuilder();
+//        for (String line : lines) {
+//            stringBuilder.append(line + "\n");
+//        }
+//        return stringBuilder.toString();
     }
 
 

@@ -48,8 +48,8 @@ public class ICD11Controller {
 
     @GetMapping(value = "/wholeDbOWL")
     public ResponseEntity<Resource> wholeDbOWL() throws Exception {
-        String allOWL = service.getAllOWL();
-        InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(allOWL.getBytes()));
+        byte[] owlFile = service.getAllOWL().toByteArray();
+        InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(owlFile));
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
         headers.add("Pragma", "no-cache");
@@ -58,7 +58,7 @@ public class ICD11Controller {
 
         return ResponseEntity.ok()
                 .headers(headers)
-                .contentLength(allOWL.length() + 2000)
+                .contentLength(owlFile.length)
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
                 .body(resource);
     }

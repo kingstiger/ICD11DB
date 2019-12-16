@@ -186,9 +186,9 @@ public class ICD11Service {
         if (format.isPrefixOWLDocumentFormat()) {
             owlxmlFormat.copyPrefixesFrom(format.asPrefixOWLDocumentFormat());
         }
-        manager.saveOntology(ontology, owlxmlFormat, IRI.create(new File("ICD11.owl").toURI()));
+        manager.saveOntology(ontology, owlxmlFormat, IRI.create(new File("tmp/ICD11.owl").toURI()));
 
-        File file = new File("ICD11.owl");
+        File file = new File("tmp/ICD11.owl");
         List<String> lines = FileUtils.readLines(file, StandardCharsets.UTF_8);
         StringBuilder stringBuilder = new StringBuilder();
         for (String line : lines) {

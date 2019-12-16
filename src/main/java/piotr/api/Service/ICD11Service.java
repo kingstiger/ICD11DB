@@ -1,5 +1,6 @@
 package piotr.api.Service;
 
+import org.apache.commons.io.FileUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.model.*;
@@ -187,12 +188,13 @@ public class ICD11Service {
         }
         manager.saveOntology(ontology, owlxmlFormat, IRI.create(new File("ICD11.owl").toURI()));
 
-        List<String> lines = Files.readAllLines(Paths.get("ICD11.owl"), StandardCharsets.UTF_8);
-        for (String str : lines) {
-            str = str + "\n";
+        File file = new File("ICD11.owl");
+        List<String> lines = FileUtils.readLines(file, StandardCharsets.UTF_8);
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String line : lines) {
+            stringBuilder.append(line + "\n");
         }
-        String text = lines.stream().map(Object::toString).collect(Collectors.joining());
-        return text;
+        return stringBuilder.toString();
     }
 
 

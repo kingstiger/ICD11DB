@@ -1,16 +1,22 @@
 package piotr.api.Controller;
 
+import org.apache.commons.io.IOUtils;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.http.HttpProperties;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import piotr.DTOs.ICD11FullResponse;
 import piotr.DTOs.ICD11TreeView;
 import piotr.api.Service.ICD11Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -41,12 +47,20 @@ public class ICD11Controller {
     }
 
     @GetMapping(value = "/wholeDbOWL")
-    public ResponseEntity<String> wholeDbOWL() throws Exception {
-        return new ResponseEntity<>(
-                service.getAllOWL(),
-                new HttpHeaders(),
-                HttpStatus.OK
-        );
+    public ResponseEntity<Resource> wholeDbOWL() throws Exception {
+        String allOWL = service.getAllOWL();
+        InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(allOWL.getBytes()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ICD-11-ontology.owl");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(allOWL.length() + 2000)
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(resource);
     }
 
 

@@ -20,7 +20,10 @@ public class EmptyUrlController {
             "[base address]/api/ICD/wholeDb\n" +
             "   returns all data from database in JSON format\n" +
             "[base address]/api/ICD/fuzzy?name={name}\n" +
-            "   returns JSON-formatted data about disease with given name after fuzzy search in DB";
+            "   returns JSON-formatted data about disease with given name after fuzzy search in DB\n\n"
+            +"**********SWAGGER UI API DOCUMENTATION**********\n"+
+            "https://apiicd.herokuapp.com/swagger-ui.html"
+            ;
 
     @GetMapping(value = "")
     public ResponseEntity<String> emptyURL() {
